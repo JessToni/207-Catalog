@@ -19,4 +19,9 @@ function calculateSustainabilityScore($pkg, $src, $lng) {
 }
 
 // Returns the text label based on score
+function getEcoLabel($score) {
+    if ($score >= 85) return 'Eco-Warrior';
+    if ($score >= 60) return 'Sustainable';
+    return 'High Impact';
+}
 ?>
