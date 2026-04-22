@@ -2,6 +2,14 @@
 require_once 'db.php';
 require_once 'helpers.php';
 
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(["status" => "error", "message" => "Unauthorized. Please log in first."]);
+    exit; // Stop the script
+}
+
 // Set header for JSON response
 header('Content-Type: application/json');
 
