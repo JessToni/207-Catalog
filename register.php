@@ -9,11 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// 1. Capture and Sanitize Input
+// Capture and sanitize input
 $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
 $password = $_POST['password'] ?? '';
 
-// 2. Strict Validation
+// Strict Validation
 if (empty($email) || empty($password)) {
     http_response_code(400);
     echo json_encode(["error" => "Email and password are required."]);
@@ -33,13 +33,10 @@ if (strlen($password) < 8) {
 }
 
 try {
-    // 3. Secure Hashing
-    // PASSWORD_DEFAULT is recommended over explicit BCRYPT as it auto-updates if PHP adds better algos
+    // Secure Hashing
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    // 4. Atomic Insertion
-    // Using the DB's UNIQUE constraint is faster and prevents "Race Conditions" 
-    // compared to doing a SELECT then an INSERT.
+    // Atomic Insertion
     $stmt = $pdo->prepare("INSERT INTO users (email, password_hash) VALUES (?, ?)");
     $stmt->execute([$email, $hashedPassword]);
 
@@ -48,11 +45,10 @@ try {
 
 } catch (\PDOException $e) {
     if ($e->getCode() == 23000) { 
-        // 23000 is the SQLSTATE for integrity constraint violation (Duplicate Entry)
         http_response_code(409); 
         echo json_encode(["error" => "This email is already registered."]);
     } else {
-        // Log the actual error internally, but don't show $e->getMessage() to the user
+        // Log the error internally
         error_log($e->getMessage()); 
         http_response_code(500);
         echo json_encode(["error" => "An internal server error occurred."]);

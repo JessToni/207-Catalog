@@ -2,17 +2,18 @@
 require_once 'db.php';
 session_start();
 
+// Start session and track user
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'] ?? '';
+    $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'] ?? '';
 
     try {
         // Find the user by email
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
-        $user = $stmt->fetch();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Check if user exists and password is correct
         if ($user && password_verify($password, $user['password_hash'])) {
@@ -23,7 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode([
                 "status" => "success",
                 "message" => "Login successful!",
-                "user" => ["email" => $user['email']]
+                "user" => [
+                    "id" => $user['id'],
+                    "email" => $user['email']
+                ]
             ]);
         } else {
             // Error response
