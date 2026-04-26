@@ -74,6 +74,15 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    async function checkAuth() {
+        const response = await fetch('check_session.php');
+        const status = await response.json();
+        
+        const authLinks = document.querySelector('.d-flex'); // The container for our button
+        if (!status.loggedIn) {
+            authLinks.innerHTML = `<a href="auth.php" class="btn btn-outline-light btn-sm">Login to Add</a>`;
+        }
+    }
     // XSS Protection Helper
     function escapeHTML(str) {
         const div = document.createElement('div');
