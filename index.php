@@ -79,10 +79,21 @@
         const status = await response.json();
         
         const authLinks = document.querySelector('.d-flex'); // The container for our button
-        if (!status.loggedIn) {
+        
+        if (status.loggedIn) {
+            authLinks.innerHTML = `
+            <button class="btn btn-outline-light btn-sm fw-bold me-2" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                + Add Product
+            </button>
+            <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
+        `;
+        } else {
             authLinks.innerHTML = `<a href="auth.php" class="btn btn-outline-light btn-sm">Login to Add</a>`;
         }
     }
+    // Call checkAuth
+    checkAuth();
+
     // XSS Protection Helper
     function escapeHTML(str) {
         const div = document.createElement('div');
