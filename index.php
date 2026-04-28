@@ -133,6 +133,9 @@
                                         Pkg: ${product.packaging_score} | Src: ${product.sourcing_score} | Lng: ${product.longevity_score}
                                     </small>
                                 </div>
+                                    <button class="btn btn-sm" onclick="toggleFav(${product.id})">
+                                    ❤️
+                                </button>
                             </div>
                         </div>
                     </div>
