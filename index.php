@@ -119,6 +119,9 @@
                 if (product.total_score >= 85) badgeClass = 'bg-success';
                 else if (product.total_score >= 60) badgeClass = 'bg-warning text-dark';
 
+                // Determine which heart icon to show
+                const heartIcon = product.is_favorite > 0 ? '❤️' : '🤍';
+
                 // Use escapeHTML for the product name to prevent XSS
                 container.innerHTML += `
                     <div class="col-md-4 mb-4">
@@ -134,7 +137,7 @@
                                     </small>
                                 </div>
                                     <button class="btn btn-sm" onclick="toggleFav(${product.id})">
-                                    ❤️
+                                    ${heartIcon}
                                 </button>
                             </div>
                         </div>
