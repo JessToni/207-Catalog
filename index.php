@@ -25,6 +25,22 @@
     </div>
 </nav>
 
+<div class="container mb-4">
+    <div class="row g-2">
+        <div class="col-md-8">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by product name..." onkeyup="filterProducts()">
+        </div>
+        <div class="col-md-4">
+            <select id="filterScore" class="form-select" onchange="filterProducts()">
+                <option value="all">All Scores</option>
+                <option value="high">Eco-Warrior (85+)</option>
+                <option value="mid">Sustainable (60-84)</option>
+                <option value="low">High Impact (<60)</option>
+            </select>
+        </div>
+    </div>
+</div>
+
 <div class="container">
     <div class="row" id="product-list">
         <div class="text-center py-5">
