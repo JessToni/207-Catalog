@@ -147,6 +147,32 @@
         }
     }
 
+    async function toggleFav(productId) {
+        const formData = new FormData();
+        formData.append('product_id', productId);
+
+        try {
+            const response = await fetch('toggle_favorite.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.status === 401) {
+                alert("Please login to favorite products!");
+                window.location.href = 'auth.php';
+                return;
+            }
+
+            const result = await response.json();
+            if (result.status) {
+                // Refresh the list to update the heart's appearance
+                loadProducts();
+            }
+        } catch (err) {
+            console.error("Error toggling favorite:", err);
+        }
+    }
+
     // Handle Form Submission via AJAX
     document.getElementById('productForm').addEventListener('submit', async (e) => {
         e.preventDefault();
