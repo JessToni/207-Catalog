@@ -38,6 +38,11 @@
                 <option value="low">High Impact (<60)</option>
             </select>
         </div>
+        <div class="col-md-3">
+            <button id="favToggleBtn" class="btn btn-outline-danger w-100" onclick="toggleFavView()">
+                Show Favorites ❤️
+            </button>
+        </div>
     </div>
 </div>
 
@@ -119,6 +124,7 @@
 
     // Fetch and Load Products
     let allProducts = []; // Global variable to store fetched data
+    let showOnlyFavorites = false;
 
     async function loadProducts() {
         const container = document.getElementById('product-list');
@@ -171,24 +177,40 @@
         });
     }
 
-// Logic for Filtering and Searching
-function filterProducts() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const scoreFilter = document.getElementById('filterScore').value;
-
-    const filtered = allProducts.filter(product => {
-        const matchesName = product.name.toLowerCase().includes(searchTerm);
+    function toggleFavView() {
+        showOnlyFavorites = !showOnlyFavorites;
+        const btn = document.getElementById('favToggleBtn');
+        if (showOnlyFavorites) {
+            btn.classList.replace('btn-outline-danger', 'btn-danger');
+            btn.innerText = 'Favorites ❤️';
+        } else {
+            btn.classList.replace('btn-danger', 'btn-outline-danger');
+            btn.innerText = 'Show Favorites ❤️';
+        }
         
-        let matchesScore = true;
-        if (scoreFilter === 'high') matchesScore = product.total_score >= 85;
-        if (scoreFilter === 'mid') matchesScore = product.total_score >= 60 && product.total_score < 85;
-        if (scoreFilter === 'low') matchesScore = product.total_score < 60;
+        filterProducts(); // Re-run the filter logic
+    }
 
-        return matchesName && matchesScore;
-    });
+    // Logic for Filtering and Searching
+    function filterProducts() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const scoreFilter = document.getElementById('filterScore').value;
 
-    renderProducts(filtered);
-}
+        const filtered = allProducts.filter(product => {
+            const matchesName = product.name.toLowerCase().includes(searchTerm);
+            
+            let matchesScore = true;
+            if (scoreFilter === 'high') matchesScore = product.total_score >= 85;
+            if (scoreFilter === 'mid') matchesScore = product.total_score >= 60 && product.total_score < 85;
+            if (scoreFilter === 'low') matchesScore = product.total_score < 60;
+
+            const matchesFav = showOnlyFavorites ? (parseInt(product.is_favorite) > 0) : true;
+
+            return matchesName && matchesScore && matchesFav;
+        });
+
+        renderProducts(filtered);
+    }
 
     async function toggleFav(productId) {
         const formData = new FormData();
@@ -209,7 +231,8 @@ function filterProducts() {
             const result = await response.json();
             if (result.status) {
                 // Refresh the list to update the heart's appearance
-                loadProducts();
+                await loadProducts();
+                filterProducts();
             }
         } catch (err) {
             console.error("Error toggling favorite:", err);
