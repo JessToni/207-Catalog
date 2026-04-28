@@ -118,53 +118,77 @@
     }
 
     // Fetch and Load Products
+    let allProducts = []; // Global variable to store fetched data
+
     async function loadProducts() {
         const container = document.getElementById('product-list');
         try {
             const response = await fetch('get_products.php');
-            const products = await response.json();
-            container.innerHTML = ''; 
-
-            if (products.length === 0) {
-                container.innerHTML = '<div class="col-12 text-center text-muted py-5"><h5>No products found yet.</h5></div>';
-                return;
-            }
-
-            products.forEach(product => {
-                let badgeClass = 'bg-danger';
-                if (product.total_score >= 85) badgeClass = 'bg-success';
-                else if (product.total_score >= 60) badgeClass = 'bg-warning text-dark';
-
-                // Determine which heart icon to show
-                const heartIcon = product.is_favorite > 0 ? '❤️' : '🤍';
-
-                // Use escapeHTML for the product name to prevent XSS
-                container.innerHTML += `
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100 shadow-sm eco-card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title fw-bold">${escapeHTML(product.name)}</h5>
-                                <div class="badge ${badgeClass} score-badge mb-3">
-                                    ${parseFloat(product.total_score).toFixed(1)}
-                                </div>
-                                <div class="p-2 bg-light rounded-pill mb-2">
-                                    <small class="text-uppercase fw-bold text-muted" style="font-size: 0.65rem;">
-                                        Pkg: ${product.packaging_score} | Src: ${product.sourcing_score} | Lng: ${product.longevity_score}
-                                    </small>
-                                </div>
-                                    <button class="btn btn-sm" onclick="toggleFav(${product.id})">
-                                    ${heartIcon}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
+            allProducts = await response.json(); // Save to our global variable
+            renderProducts(allProducts); // Pass data to a rendering function
         } catch (error) {
-            container.innerHTML = `<div class="alert alert-danger">Error loading data. Check if get_products.php is active.</div>`;
-            console.error('Error:', error);
+            container.innerHTML = `<div class="alert alert-danger">Error loading data.</div>`;
         }
     }
+
+    // Build HTML
+    function renderProducts(products) {
+        const container = document.getElementById('product-list');
+        container.innerHTML = '';
+
+        if (products.length === 0) {
+            container.innerHTML = '<div class="col-12 text-center text-muted py-5"><h5>No matching products found.</h5></div>';
+            return;
+        }
+
+        products.forEach(product => {
+            let badgeClass = 'bg-danger';
+            if (product.total_score >= 85) badgeClass = 'bg-success';
+            else if (product.total_score >= 60) badgeClass = 'bg-warning text-dark';
+
+            const heartIcon = product.is_favorite > 0 ? '❤️' : '🤍';
+
+            container.innerHTML += `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm eco-card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">${escapeHTML(product.name)}</h5>
+                            <div class="badge ${badgeClass} score-badge mb-3">
+                                ${parseFloat(product.total_score).toFixed(1)}
+                            </div>
+                            <div class="p-2 bg-light rounded-pill mb-2">
+                                <small class="text-uppercase fw-bold text-muted" style="font-size: 0.65rem;">
+                                    Pkg: ${product.packaging_score} | Src: ${product.sourcing_score} | Lng: ${product.longevity_score}
+                                </small>
+                            </div>
+                            <button class="btn btn-sm" onclick="toggleFav(${product.id})">
+                                ${heartIcon}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+// Logic for Filtering and Searching
+function filterProducts() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const scoreFilter = document.getElementById('filterScore').value;
+
+    const filtered = allProducts.filter(product => {
+        const matchesName = product.name.toLowerCase().includes(searchTerm);
+        
+        let matchesScore = true;
+        if (scoreFilter === 'high') matchesScore = product.total_score >= 85;
+        if (scoreFilter === 'mid') matchesScore = product.total_score >= 60 && product.total_score < 85;
+        if (scoreFilter === 'low') matchesScore = product.total_score < 60;
+
+        return matchesName && matchesScore;
+    });
+
+    renderProducts(filtered);
+}
 
     async function toggleFav(productId) {
         const formData = new FormData();
